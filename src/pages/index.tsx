@@ -1,7 +1,6 @@
 import { SignInButton, useUser } from "@clerk/nextjs";
 import Head from "next/head";
 import Image from "next/image";
-import Dashboard from "@/components/Dashboard";
 
 import { RouterOutputs, api } from "@/utils/api";
 import { Button } from "@/components/ui/button";

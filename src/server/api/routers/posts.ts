@@ -2,13 +2,20 @@ import type { User } from "@clerk/backend/dist/types/api";
 import { clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import dayjs, { type Dayjs } from "dayjs";
 
 import {
   createTRPCRouter,
   publicProcedure,
   privateProcedure,
 } from "@/server/api/trpc";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, "10 s"),
+  analytics: true,
+});
 
 const filterUserForClient = (user: User) => {
   return {
