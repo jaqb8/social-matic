@@ -62,7 +62,14 @@ export const postsRouter = createTRPCRouter({
   createPost: privateProcedure
     .input(
       z.object({
-        content: z.string().min(1).max(255),
+        content: z
+          .string()
+          .min(1, {
+            message: "Content must be at least 1 character long",
+          })
+          .max(255, {
+            message: "Content must be at most 255 characters long",
+          }),
         postDate: z.date(),
         platform: z.enum(["LINKEDIN", "TWITTER"]),
       }),
@@ -75,6 +82,7 @@ export const postsRouter = createTRPCRouter({
       if (!success) {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
+          message: "Too many requests. Please try again later.",
         });
       }
 

@@ -1,39 +1,11 @@
 import { SignInButton, useUser } from "@clerk/nextjs";
 import Head from "next/head";
-import Image from "next/image";
 
-import { RouterOutputs, api } from "@/utils/api";
 import { Button } from "@/components/ui/button";
-import { LoadingPage } from "@/components/ui/spinner";
-import { redirect, useRouter } from "next/navigation";
-
-const SchedulePostWizard = () => {
-  const { user, isSignedIn } = useUser();
-
-  if (!isSignedIn) {
-    return null;
-  }
-
-  return (
-    <div className="flex w-full gap-4">
-      <Image
-        src={user.imageUrl}
-        alt="Profile image"
-        width={80}
-        height={80}
-        className="rounded-full"
-      />
-      <input
-        type="text"
-        placeholder="Type something..."
-        className="grow bg-transparent outline-none"
-      />
-    </div>
-  );
-};
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const { isLoaded: userLoaded, isSignedIn, user } = useUser();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
   const router = useRouter();
 
   if (!userLoaded) {

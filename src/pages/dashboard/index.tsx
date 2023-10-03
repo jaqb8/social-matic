@@ -6,6 +6,8 @@ import { type RouterOutputs, api } from "@/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
+import { error } from "console";
 
 dayjs.extend(relativeTime);
 
@@ -96,6 +98,9 @@ const RightContent = () => {
         data.map((fullPost) => (
           <PostView key={fullPost.post.id} {...fullPost} />
         ))}
+      {!!data && data.length === 0 && (
+        <h3 className="text-md pt-4 text-slate-300">No scheduled posts yet.</h3>
+      )}
     </section>
   );
 };
@@ -110,6 +115,14 @@ const CreatePostWizard = () => {
     onSuccess: () => {
       setInput("");
       void ctx.posts.getAll.invalidate();
+    },
+    onError: (err) => {
+      const errorMessage = err.data?.zodError?.fieldErrors.content;
+      if (errorMessage?.[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to schedule post! Please try again.");
+      }
     },
   });
 
