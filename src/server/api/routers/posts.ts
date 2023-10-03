@@ -2,8 +2,13 @@ import type { User } from "@clerk/backend/dist/types/api";
 import { clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import dayjs, { type Dayjs } from "dayjs";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  privateProcedure,
+} from "@/server/api/trpc";
 
 const filterUserForClient = (user: User) => {
   return {
@@ -17,6 +22,11 @@ export const postsRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.db.post.findMany({
       take: 100,
+      orderBy: [
+        {
+          postDate: "desc",
+        },
+      ],
     });
 
     const users = (
@@ -41,4 +51,24 @@ export const postsRouter = createTRPCRouter({
       };
     });
   }),
+  createPost: privateProcedure
+    .input(
+      z.object({
+        content: z.string().min(1).max(255),
+        postDate: z.date(),
+        platform: z.enum(["LINKEDIN", "TWITTER"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const authorId = ctx.currentUserId;
+      const post = await ctx.db.post.create({
+        data: {
+          authorId,
+          content: input.content,
+          postDate: input.postDate,
+          platform: input.platform,
+        },
+      });
+      return post;
+    }),
 });

@@ -1,10 +1,11 @@
 import { useUser } from "@clerk/nextjs";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { type RouterOutputs, api } from "~/utils/api";
+import { type RouterOutputs, api } from "@/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { Button } from "@/components/ui/button";
 
 dayjs.extend(relativeTime);
 
@@ -27,12 +28,10 @@ const Sidebar = () => {
             className="rounded-2xl"
           />
           <h1 className="text-2xl font-bold">{user.username}</h1>
-          <p className="text-sm text-secondary">
-            {user.primaryEmailAddress?.emailAddress}
-          </p>
+          <p className="text-sm">{user.primaryEmailAddress?.emailAddress}</p>
         </div>
         <div>
-          <li className="flex list-none flex-col gap-3 font-bold text-secondary">
+          <li className="flex list-none flex-col gap-3 font-bold">
             <ul className="cursor-pointer hover:text-primary">
               <Link href="/dashboard">Dashboard</Link>
             </ul>
@@ -90,7 +89,7 @@ const RightContent = () => {
   }
 
   return (
-    <section className="grow bg-slate-300 px-14 py-8">
+    <section className="grow bg-slate-600 px-14 py-8">
       {!data && <div>Something went wrong...</div>}
       <h1 className="text-lg font-bold">Scheduled posts</h1>
       {!!data &&
@@ -101,17 +100,58 @@ const RightContent = () => {
   );
 };
 
+const CreatePostWizard = () => {
+  const { user } = useUser();
+  const [input, setInput] = useState("");
+
+  const ctx = api.useContext();
+
+  const { mutate, isLoading: isPosting } = api.posts.createPost.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate();
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <>
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        className="rounded p-4 text-slate-900"
+        cols={20}
+        rows={5}
+      />
+      <div className="flex justify-end gap-3 text-sm">
+        <Button
+          onClick={() =>
+            mutate({
+              content: input,
+              platform: "TWITTER",
+              postDate: dayjs().toDate(),
+            })
+          }
+          disabled={isPosting}
+        >
+          Post now
+        </Button>
+        <Button disabled={isPosting}>Schedule post</Button>
+      </div>
+    </>
+  );
+};
+
 const Content = () => {
   return (
-    <div className="flex w-full flex-col overflow-hidden rounded-2xl text-slate-900 xl:flex-row">
-      <section id="main-content" className="bg-slate-100 px-14 py-8 xl:w-[70%]">
+    <div className="flex w-full flex-col overflow-hidden rounded-2xl text-white xl:flex-row">
+      <section id="main-content" className="bg-slate-400 px-14 py-8 xl:w-[70%]">
         <div className="flex flex-col gap-8">
           <h1 className="text-2xl font-bold">Dashboard</h1>
-          <textarea className="rounded p-4" cols={20} rows={5} />
-          <div className="flex justify-end gap-3 text-sm">
-            <button className="btn btn-primary">Post now</button>
-            <button className="btn btn-primary">Schedule post</button>
-          </div>
+          <CreatePostWizard />
         </div>
       </section>
       <RightContent />
