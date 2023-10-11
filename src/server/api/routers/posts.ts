@@ -71,7 +71,7 @@ export const postsRouter = createTRPCRouter({
             message: "Content must be at most 255 characters long",
           }),
         postDate: z.date(),
-        platform: z.enum(["LINKEDIN", "TWITTER"]),
+        platforms: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -91,7 +91,7 @@ export const postsRouter = createTRPCRouter({
           authorId,
           content: input.content,
           postDate: input.postDate,
-          platform: input.platform,
+          platforms: {}, // TODO: implment many-to-many relationship query
         },
       });
       return post;

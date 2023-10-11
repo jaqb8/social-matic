@@ -5,12 +5,15 @@ import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
 import { Toaster } from "react-hot-toast";
+import Layout from "./layout";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <ClerkProvider {...pageProps}>
-      <Toaster position="bottom-center" />
-      <Component {...pageProps} />
+      <Layout>
+        <Toaster position="bottom-center" />
+        <Component {...pageProps} />
+      </Layout>
     </ClerkProvider>
   );
 };

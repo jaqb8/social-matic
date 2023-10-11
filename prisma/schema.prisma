@@ -11,21 +11,42 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Post {
-    id        String      @id @default(cuid())
-    createdAt DateTime    @default(now())
+model Platform {
+    id       String           @id @default(cuid())
+    name     PlatormEnum      @unique
+    posts    PostToPlatform[]
+}
 
-    content   String      @db.VarChar(255)
-    mediaURL  String?
-    postDate  DateTime
-    platform  Platform
+
+enum PlatormEnum {
+  TWITTER
+  LINKEDIN
+}
+
+
+model Post {
+    id         String      @id @default(cuid())
+    createdAt  DateTime    @default(now())
+
+    content    String      @db.VarChar(255)
+    mediaURL   String?
+    postDate   DateTime
+    platforms  PostToPlatform[]
 
     authorId  String
 
     @@index([authorId])
 }
 
-enum Platform {
-    LINKEDIN
-    TWITTER
+model PostToPlatform {
+    id      String      @id @default(cuid())
+
+    postId    String
+    post      Post        @relation(fields: [postId], references: [id])
+
+    platformId String
+    platform  Platform    @relation(fields: [platformId], references: [id])
+
+    @@index([postId])
+    @@index([platformId])
 }
