@@ -1,15 +1,10 @@
-import type { User } from "@clerk/backend/dist/types/api";
-import { clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  publicProcedure,
-  privateProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, privateProcedure } from "@/server/api/trpc";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { PlatformEnum } from "@/lib/types";
 
 // Create a new ratelimiter with a sliding window of 3 requests per minute
 const ratelimit = new Ratelimit({
@@ -18,45 +13,30 @@ const ratelimit = new Ratelimit({
   analytics: true,
 });
 
-const filterUserForClient = (user: User) => {
-  return {
-    id: user.id,
-    username: user.username,
-    imageUrl: user.imageUrl,
-  };
-};
+// const filterUserForClient = (user: User) => {
+//   console.log("===>", user);
+//   return {
+//     id: user.id,
+//     username: user.username ? user.username : user.firstName,
+//     imageUrl: user.imageUrl,
+//   };
+// };
 
 export const postsRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const posts = await ctx.db.post.findMany({
+  getAll: privateProcedure.query(async ({ ctx }) => {
+    return await ctx.db.post.findMany({
       take: 100,
       orderBy: [
         {
-          postDate: "desc",
+          postDate: "asc",
         },
       ],
-    });
-
-    const users = (
-      await clerkClient.users.getUserList({
-        userId: posts.map((post) => post.authorId),
-        limit: 100,
-      })
-    ).map(filterUserForClient);
-
-    return posts.map((post) => {
-      const author = users.find((user) => user.id === post.authorId);
-      if (!author) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Author not found",
-        });
-      }
-
-      return {
-        post,
-        author,
-      };
+      include: {
+        platforms: true,
+      },
+      where: {
+        authorId: ctx.currentUserId,
+      },
     });
   }),
   createPost: privateProcedure
@@ -71,7 +51,7 @@ export const postsRouter = createTRPCRouter({
             message: "Content must be at most 255 characters long",
           }),
         postDate: z.date(),
-        platforms: z.array(z.string()),
+        platforms: z.array(PlatformEnum),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -91,7 +71,11 @@ export const postsRouter = createTRPCRouter({
           authorId,
           content: input.content,
           postDate: input.postDate,
-          platforms: {}, // TODO: implment many-to-many relationship query
+          platforms: {
+            connect: input.platforms.map((platform) => ({
+              name: platform,
+            })),
+          },
         },
       });
       return post;

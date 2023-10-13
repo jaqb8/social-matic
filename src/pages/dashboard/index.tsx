@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/nextjs";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { type RouterOutputs, api } from "@/utils/api";
 import dayjs from "dayjs";
@@ -22,7 +22,7 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
-import { CalendarIcon, Linkedin, Twitter } from "lucide-react";
+import { CalendarIcon, Linkedin, Loader2, Twitter } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -30,13 +30,8 @@ import {
 } from "@/components/ui/popover";
 import { cn, formatValueWithinRange } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
+import { PlatformEnum } from "@/lib/types";
+import { Spinner } from "@/components/ui/spinner";
 
 dayjs.extend(relativeTime);
 
@@ -73,6 +68,7 @@ const CreatePostWizard = () => {
   const { mutate, isLoading: isPosting } = api.posts.createPost.useMutation({
     onSuccess: () => {
       void ctx.posts.getAll.invalidate();
+      toast.success("Post scheduled!");
     },
     onError: (err) => {
       const errorMessage = err.data?.zodError?.fieldErrors.content;
@@ -93,7 +89,7 @@ const CreatePostWizard = () => {
       .max(255, {
         message: "Your post must be at most 255 characters long.",
       }),
-    platform: z.array(z.string()).nonempty({
+    platforms: z.array(PlatformEnum).nonempty({
       message: "You have to select at least one platform.",
     }),
     postDate: z.date({
@@ -137,7 +133,7 @@ const CreatePostWizard = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       content: "",
-      platform: [],
+      platforms: [],
       postTime: {
         hour: "",
         minute: "",
@@ -145,25 +141,23 @@ const CreatePostWizard = () => {
     },
   });
 
-  const platforms = [
+  const platformItems = [
     {
       label: "Twitter",
-      id: "TWITTER",
+      id: PlatformEnum.enum.TWITTER,
       icon: <Twitter size={16} />,
     },
     {
       label: "LinkedIn",
-      id: "LINKEDIN",
+      id: PlatformEnum.enum.LINKEDIN,
       icon: <Linkedin size={16} />,
     },
   ] as const;
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = (
     data: z.infer<typeof formSchema>,
-    event?: React.BaseSyntheticEvent,
   ) => {
-    event?.preventDefault();
-    const { postDate, postTime, content, platform } = data;
+    const { postDate, postTime, content, platforms } = data;
 
     const fullPostDate = dayjs(postDate)
       .hour(parseInt(postTime.hour))
@@ -171,12 +165,18 @@ const CreatePostWizard = () => {
       .toDate();
     console.log(fullPostDate);
 
-    // mutate({
-    //   content,
-    //   postDate: fullPostDate,
-    //   platform,
-    // });
+    mutate({
+      content,
+      postDate: fullPostDate,
+      platforms,
+    });
   };
+
+  useEffect(() => {
+    if (form.formState.isSubmitSuccessful) {
+      form.reset();
+    }
+  }, [form, form.formState.isSubmitSuccessful, form.reset]);
 
   if (!user) {
     return null;
@@ -185,7 +185,13 @@ const CreatePostWizard = () => {
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void form.handleSubmit(onSubmit)(event);
+          }}
+          className="space-y-8"
+        >
           <FormField
             control={form.control}
             name="content"
@@ -207,7 +213,7 @@ const CreatePostWizard = () => {
 
           <FormField
             control={form.control}
-            name="platform"
+            name="platforms"
             render={() => (
               <FormItem>
                 <div className="pb-1">
@@ -217,11 +223,11 @@ const CreatePostWizard = () => {
                   </FormDescription>
                 </div>
                 <div className="flex gap-2">
-                  {platforms.map((platform) => (
+                  {platformItems.map((platform) => (
                     <FormField
                       key={platform.id}
                       control={form.control}
-                      name="platform"
+                      name="platforms"
                       render={({ field }) => {
                         return (
                           <FormItem
@@ -395,15 +401,24 @@ const CreatePostWizard = () => {
             )}
           />
 
-          <Button
-            onClick={() => {
-              console.log(form.formState.errors);
-            }}
-            className="w-full sm:w-auto"
-            type="submit"
-          >
-            Submit
-          </Button>
+          {isPosting && (
+            <Button disabled>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Please wait
+            </Button>
+          )}
+
+          {!isPosting && (
+            <Button
+              onClick={() => {
+                console.log(form.formState.errors);
+              }}
+              className="w-full sm:w-auto"
+              type="submit"
+            >
+              Submit
+            </Button>
+          )}
         </form>
       </Form>
     </>
@@ -413,18 +428,23 @@ const CreatePostWizard = () => {
 const PostsList = () => {
   const { data, isLoading } = api.posts.getAll.useQuery();
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <section className="grow bg-slate-600 px-14 py-8">
-      {!data && <div>Something went wrong...</div>}
-      <h1 className="text-lg font-bold">Scheduled posts</h1>
-      {!!data &&
-        data.map((fullPost) => (
-          <PostItem key={fullPost.post.id} {...fullPost} />
-        ))}
+      {isLoading && (
+        <div className="flex justify-center">
+          <Spinner />
+        </div>
+      )}
+
+      {!data && !isLoading && <div>Failed to fetch scheduled posts.</div>}
+      {!!data && (
+        <>
+          <h1 className="text-lg font-bold">Scheduled posts</h1>
+          {data.map((post) => (
+            <PostItem key={post.id} {...post} />
+          ))}
+        </>
+      )}
       {!!data && data.length === 0 && (
         <h3 className="text-md pt-4 text-slate-300">No scheduled posts yet.</h3>
       )}
@@ -432,36 +452,29 @@ const PostsList = () => {
   );
 };
 
-type PostWithAuthor = RouterOutputs["posts"]["getAll"][number];
+type Post = RouterOutputs["posts"]["getAll"][number];
 
-const PostItem = (props: PostWithAuthor) => {
-  const { post, author } = props;
+const PostItem = (props: Post) => {
+  const { content, postDate, platforms } = props;
 
-  const postIcon = {
-    TWITTER: "/x.png",
-    LINKEDIN: "/linkedin.png",
+  const platformIcons = {
+    TWITTER: <Twitter size={16} />,
+    LINKEDIN: <Linkedin size={16} />,
   };
 
   return (
-    <div
-      className="flex gap-3 overflow-hidden break-words px-2 py-4"
-      key={post.id}
-    >
-      <div>
-        <Image
-          src=""
-          width={50}
-          height={50}
-          alt="Author profile image"
-          className="rounded-full"
-        />
-      </div>
+    <div className="flex gap-3 overflow-hidden break-words px-2 py-4">
       <div className="block">
-        <h3>{post.content}</h3>
+        <h3>{content}</h3>
         <p className="font-thin ">
-          {`${dayjs(post.postDate).fromNow()} (${dayjs(post.postDate).format(
+          {`${dayjs(postDate).fromNow()} (${dayjs(postDate).format(
             "DD/MM/YYYY HH:mm",
           )})`}
+        </p>
+        <p className="flex items-center gap-2 text-sm font-light">
+          {platforms.map((platform) => (
+            <span key={platform.id}>{platformIcons[platform.name]}</span>
+          ))}
         </p>
       </div>
     </div>

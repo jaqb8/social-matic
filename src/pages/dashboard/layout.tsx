@@ -22,31 +22,35 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="hidden w-72 p-10 sm:block">
-      <div className="flex flex-col gap-10">
-        <div className="flex flex-col gap-1">
-          <Image
-            src={user.imageUrl}
-            alt="Profile image"
-            width={80}
-            height={80}
-            className="rounded-2xl"
-          />
-          <h1 className="text-2xl font-bold">{user.username}</h1>
-          <p className="text-sm">{user.primaryEmailAddress?.emailAddress}</p>
+    <>
+      <aside className="hidden w-72 p-10 sm:block">
+        <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-1">
+            <Image
+              src={user.imageUrl}
+              alt="Profile image"
+              width={80}
+              height={80}
+              className="rounded-2xl"
+            />
+            <h1 className="text-xl font-bold">
+              {user.username ? user.username : user.firstName}
+            </h1>
+            <p className="text-sm">{user.primaryEmailAddress?.emailAddress}</p>
+          </div>
+          <div>
+            <li className="flex list-none flex-col gap-3 font-bold">
+              <ul className="cursor-pointer hover:text-primary">
+                <Link href="/dashboard">Dashboard</Link>
+              </ul>
+              <ul className="cursor-pointer hover:text-primary">Archive</ul>
+              <ul className="cursor-pointer hover:text-primary">Settings</ul>
+              <ul className="cursor-pointer hover:text-primary">Account</ul>
+            </li>
+          </div>
         </div>
-        <div>
-          <li className="flex list-none flex-col gap-3 font-bold">
-            <ul className="cursor-pointer hover:text-primary">
-              <Link href="/dashboard">Dashboard</Link>
-            </ul>
-            <ul className="cursor-pointer hover:text-primary">Archive</ul>
-            <ul className="cursor-pointer hover:text-primary">Settings</ul>
-            <ul className="cursor-pointer hover:text-primary">Account</ul>
-          </li>
-        </div>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 };
 
