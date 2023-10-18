@@ -1,9 +1,13 @@
 import { Menu, Webhook, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MobileSidebar from "./mobile-sidebar";
+import { useRouter } from "next/router";
 
 const Navbar = () => {
-  const [isSidebarOpen, toggleSidebar] = useState(true);
+  const [isSidebarOpen, toggleSidebar] = useState(false);
+  const dynamicRoute = useRouter().asPath;
+
+  useEffect(() => toggleSidebar(false), [dynamicRoute]);
 
   return (
     <>

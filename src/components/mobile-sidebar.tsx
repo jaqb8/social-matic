@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import Image from "next/image";
-import { platform } from "os";
+import Link from "next/link";
 
 interface MobileSidebarProps {
   onOpen: () => void;
@@ -23,18 +23,22 @@ const MobileSidebar = ({ onOpen, isOpen }: MobileSidebarProps) => {
     {
       name: "Dashboard",
       icon: <LayoutDashboard />,
+      href: "/dashboard",
     },
     {
       name: "Archive",
       icon: <Archive />,
+      href: "/archive",
     },
     {
       name: "Settings",
       icon: <Settings />,
+      href: "/#",
     },
     {
       name: "Account",
       icon: <User />,
+      href: "/#",
     },
   ] as const;
 
@@ -67,10 +71,12 @@ const MobileSidebar = ({ onOpen, isOpen }: MobileSidebarProps) => {
         </div>
         <div className="flex flex-1 flex-col gap-2">
           {menuItems.map((item) => (
-            <div key={item.name} className="flex gap-2 p-2 font-bold">
-              {item.icon}
-              {item.name}
-            </div>
+            <Link key={item.name} href={item.href}>
+              <div className="flex gap-2 p-2 font-bold">
+                {item.icon}
+                {item.name}
+              </div>
+            </Link>
           ))}
         </div>
         <div className="flex gap-2 px-2 pb-8 font-bold">

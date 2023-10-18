@@ -13,15 +13,6 @@ const ratelimit = new Ratelimit({
   analytics: true,
 });
 
-// const filterUserForClient = (user: User) => {
-//   console.log("===>", user);
-//   return {
-//     id: user.id,
-//     username: user.username ? user.username : user.firstName,
-//     imageUrl: user.imageUrl,
-//   };
-// };
-
 export const postsRouter = createTRPCRouter({
   getAll: privateProcedure.query(async ({ ctx }) => {
     return await ctx.db.post.findMany({
@@ -36,6 +27,44 @@ export const postsRouter = createTRPCRouter({
       },
       where: {
         authorId: ctx.currentUserId,
+      },
+    });
+  }),
+  getAllScheduled: privateProcedure.query(async ({ ctx }) => {
+    return await ctx.db.post.findMany({
+      take: 100,
+      orderBy: [
+        {
+          postDate: "asc",
+        },
+      ],
+      include: {
+        platforms: true,
+      },
+      where: {
+        authorId: ctx.currentUserId,
+        postDate: {
+          gt: new Date(),
+        },
+      },
+    });
+  }),
+  getAllArchived: privateProcedure.query(async ({ ctx }) => {
+    return await ctx.db.post.findMany({
+      take: 100,
+      orderBy: [
+        {
+          postDate: "asc",
+        },
+      ],
+      include: {
+        platforms: true,
+      },
+      where: {
+        authorId: ctx.currentUserId,
+        postDate: {
+          lt: new Date(),
+        },
       },
     });
   }),

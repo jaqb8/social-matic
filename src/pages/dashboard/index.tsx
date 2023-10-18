@@ -1,13 +1,11 @@
 import { useUser } from "@clerk/nextjs";
 import React, { useEffect } from "react";
-import Image from "next/image";
 import { type RouterOutputs, api } from "@/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
-import DashboardLayout from "./layout";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -32,14 +30,15 @@ import { cn, formatValueWithinRange } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { PlatformEnum } from "@/lib/types";
 import { Spinner } from "@/components/ui/spinner";
+import AuthenticatedLayout from "@/components/authenticated-layout";
 
 dayjs.extend(relativeTime);
 
 const Dashboard = () => {
   return (
-    <DashboardLayout>
+    <AuthenticatedLayout>
       <Content />
-    </DashboardLayout>
+    </AuthenticatedLayout>
   );
 };
 
@@ -426,27 +425,30 @@ const CreatePostWizard = () => {
 };
 
 const PostsList = () => {
-  const { data, isLoading } = api.posts.getAll.useQuery();
+  const { data, isLoading, isError, isSuccess } =
+    api.posts.getAllScheduled.useQuery();
 
   return (
-    <section className="grow bg-slate-600 px-14 py-8">
+    <section className="grow bg-slate-600 px-10 py-8">
+      <h1 className="text-2xl font-bold">Scheduled posts</h1>
       {isLoading && (
         <div className="flex justify-center">
           <Spinner />
         </div>
       )}
 
-      {!data && !isLoading && <div>Failed to fetch scheduled posts.</div>}
-      {!!data && (
+      {isError && <div>Failed to fetch scheduled posts.</div>}
+      {isSuccess && (
         <>
-          <h1 className="text-lg font-bold">Scheduled posts</h1>
+          {data.length === 0 && (
+            <h3 className="text-md pt-4 text-slate-300">
+              No scheduled posts yet.
+            </h3>
+          )}
           {data.map((post) => (
             <PostItem key={post.id} {...post} />
           ))}
         </>
-      )}
-      {!!data && data.length === 0 && (
-        <h3 className="text-md pt-4 text-slate-300">No scheduled posts yet.</h3>
       )}
     </section>
   );
@@ -463,7 +465,7 @@ const PostItem = (props: Post) => {
   };
 
   return (
-    <div className="flex gap-3 overflow-hidden break-words px-2 py-4">
+    <div className="flex gap-3 overflow-hidden break-words py-4">
       <div className="block">
         <h3>{content}</h3>
         <p className="font-thin ">

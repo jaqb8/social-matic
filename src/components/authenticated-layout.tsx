@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { type PropsWithChildren } from "react";
 
-const DashboardLayout = (props: PropsWithChildren) => {
+const AuthenticatedLayout = (props: PropsWithChildren) => {
   return (
     <main className="h-screen p-4">
       <div className="flex gap-8">
@@ -43,7 +43,9 @@ const Sidebar = () => {
               <ul className="cursor-pointer hover:text-primary">
                 <Link href="/dashboard">Dashboard</Link>
               </ul>
-              <ul className="cursor-pointer hover:text-primary">Archive</ul>
+              <ul className="cursor-pointer hover:text-primary">
+                <Link href="/archive">Archive</Link>
+              </ul>
               <ul className="cursor-pointer hover:text-primary">Settings</ul>
               <ul className="cursor-pointer hover:text-primary">Account</ul>
             </li>
@@ -54,4 +56,4 @@ const Sidebar = () => {
   );
 };
 
-export default DashboardLayout;
+export default AuthenticatedLayout;
