@@ -27,6 +27,7 @@
     "@trpc/next": "^10.37.1",
     "@trpc/react-query": "^10.37.1",
     "@trpc/server": "^10.37.1",
+    "@upstash/qstash": "^2.1.8",
     "@upstash/ratelimit": "^0.4.4",
     "@upstash/redis": "^1.22.1",
     "class-variance-authority": "^0.7.0",
