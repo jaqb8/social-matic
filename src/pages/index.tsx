@@ -3,7 +3,6 @@ import Head from "next/head";
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import Layout from "./layout";
 
 export default function Home() {
   const { isLoaded: userLoaded, isSignedIn } = useUser();

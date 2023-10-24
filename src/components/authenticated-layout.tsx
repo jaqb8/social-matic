@@ -2,6 +2,7 @@ import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import React, { type PropsWithChildren } from "react";
+import { Skeleton } from "./ui/skeleton";
 
 const AuthenticatedLayout = (props: PropsWithChildren) => {
   return (
@@ -15,7 +16,11 @@ const AuthenticatedLayout = (props: PropsWithChildren) => {
 };
 
 const Sidebar = () => {
-  const { user, isSignedIn } = useUser();
+  const { user, isSignedIn, isLoaded } = useUser();
+
+  if (!isLoaded) {
+    return <Skeleton className="hidden sm:block sm:w-72" />;
+  }
 
   if (!isSignedIn) {
     return null;
