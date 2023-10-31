@@ -31,6 +31,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { PlatformEnum } from "@/lib/types";
 import { Spinner } from "@/components/ui/spinner";
 import AuthenticatedLayout from "@/components/authenticated-layout";
+import Link from "next/link";
+import { type OAuthProvider } from "@clerk/nextjs/dist/types/server";
 
 dayjs.extend(relativeTime);
 
@@ -145,13 +147,20 @@ const CreatePostWizard = () => {
       label: "Twitter",
       id: PlatformEnum.enum.TWITTER,
       icon: <Twitter size={16} />,
+      disabled: !user?.externalAccounts.find(
+        (account) => account.provider === "twitter",
+      ),
     },
     {
       label: "LinkedIn",
       id: PlatformEnum.enum.LINKEDIN,
       icon: <Linkedin size={16} />,
+      disabled: !user?.externalAccounts.find(
+        (account) => account.provider === ("linkedin_oidc" as OAuthProvider),
+      ),
     },
   ] as const;
+  console.log(user?.externalAccounts);
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = (
     data: z.infer<typeof formSchema>,
@@ -218,7 +227,15 @@ const CreatePostWizard = () => {
                 <div className="pb-1">
                   <FormLabel className="text-base">Platform</FormLabel>
                   <FormDescription className="text-slate-200">
-                    Select the platform you want to post to.
+                    Select the platform you want to post to. If desired platform
+                    is not available, please connect your account in the{" "}
+                    <Link
+                      className="font-bold hover:text-accent-foreground"
+                      href="/user-profile"
+                    >
+                      account settings
+                    </Link>{" "}
+                    page.
                   </FormDescription>
                 </div>
                 <div className="flex gap-2">
@@ -238,6 +255,7 @@ const CreatePostWizard = () => {
                                 className="w-full sm:w-auto"
                                 variant="outline"
                                 pressed={field.value?.includes(platform.id)}
+                                disabled={platform.disabled}
                                 onPressedChange={(pressed) => {
                                   return pressed
                                     ? field.onChange([

@@ -2,6 +2,7 @@ import { Menu, Webhook, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import MobileSidebar from "./mobile-sidebar";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const Navbar = () => {
   const [isSidebarOpen, toggleSidebar] = useState(false);
@@ -18,10 +19,12 @@ const Navbar = () => {
             onClick={() => toggleSidebar(!isSidebarOpen)}
             size={32}
           />
-          <div className="flex w-full flex-initial items-center justify-center gap-1 sm:justify-start">
-            <Webhook size={28} />
-            SocialMatic
-          </div>
+          <Link href="/">
+            <div className="flex w-full flex-initial items-center justify-center gap-1 sm:justify-start">
+              <Webhook size={28} />
+              SocialMatic
+            </div>
+          </Link>
         </div>
       </div>
       <MobileSidebar

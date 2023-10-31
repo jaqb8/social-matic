@@ -6,7 +6,7 @@ import { Skeleton } from "./ui/skeleton";
 
 const AuthenticatedLayout = (props: PropsWithChildren) => {
   return (
-    <main className="h-screen p-4">
+    <main className="h-screen p-10">
       <div className="flex gap-8">
         <Sidebar />
         {props.children}
@@ -52,7 +52,9 @@ const Sidebar = () => {
                 <Link href="/archive">Archive</Link>
               </ul>
               <ul className="cursor-pointer hover:text-primary">Settings</ul>
-              <ul className="cursor-pointer hover:text-primary">Account</ul>
+              <ul className="cursor-pointer hover:text-primary">
+                <Link href="/user-profile">Account</Link>
+              </ul>
             </li>
           </div>
         </div>
