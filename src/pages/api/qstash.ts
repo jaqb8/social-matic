@@ -1,15 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifySignature } from "@upstash/qstash/dist/nextjs";
 import clerk from "@clerk/clerk-sdk-node";
-import { getAuth } from "@clerk/nextjs/server";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log("req.headers", req.headers);
 
-  const { userId } = getAuth(req);
+  const { userId } = req.body as unknown as { userId?: string };
 
   if (!userId) {
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(400).json({ error: "Missing userId" });
   }
 
   const [OAuthAccessToken] = await clerk.users.getUserOauthAccessToken(
