@@ -20,8 +20,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const { token } = OAuthAccessToken;
-  console.log("twitter access token: ", token);
+  // const { token } = OAuthAccessToken;
+  console.log("twitter access token: ", OAuthAccessToken);
 
   await new Promise((r) => setTimeout(r, 1000));
 
