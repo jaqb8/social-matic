@@ -3,8 +3,11 @@ import { z } from "zod";
 
 import { createTRPCRouter, privateProcedure } from "@/server/api/trpc";
 import { Ratelimit } from "@upstash/ratelimit";
+import { Client } from "@upstash/qstash";
 import { Redis } from "@upstash/redis";
 import { PlatformEnum } from "@/lib/types";
+import { env } from "@/env.mjs";
+import { buildCronFromDate } from "@/lib/utils";
 
 // Create a new ratelimiter with a sliding window of 3 requests per minute
 const ratelimit = new Ratelimit({
@@ -12,6 +15,11 @@ const ratelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(3, "1 m"),
   analytics: true,
 });
+
+const qstashClient = new Client({
+  token: env.QSTASH_TOKEN,
+});
+const QSTASH_URL = "https://social-matic.vercel.app/api/qstash";
 
 export const postsRouter = createTRPCRouter({
   getAll: privateProcedure.query(async ({ ctx }) => {
@@ -107,6 +115,21 @@ export const postsRouter = createTRPCRouter({
           },
         },
       });
+
+      const cron = buildCronFromDate(input.postDate);
+      await qstashClient.schedules.create({
+        destination: QSTASH_URL,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: authorId,
+          content: input.content,
+          platforms: input.platforms,
+        }),
+        cron,
+      });
+
       return post;
     }),
 });

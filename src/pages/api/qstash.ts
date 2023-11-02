@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { verifySignature } from "@upstash/qstash/dist/nextjs";
 import clerk from "@clerk/clerk-sdk-node";
 import { TwitterApi } from "twitter-api-v2";
-import { env } from "../../env.mjs";
+import { env } from "@/env.mjs";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log("req.headers", req.headers);

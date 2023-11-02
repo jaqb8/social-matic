@@ -20,3 +20,8 @@ export function formatValueWithinRange(
 
   return intValue.toString().padStart(2, "0");
 }
+
+export const buildCronFromDate = (date: Date) =>
+  `${date.getMinutes()} ${date.getHours()} ${date.getDate()} ${
+    date.getMonth() + 1
+  } *`;

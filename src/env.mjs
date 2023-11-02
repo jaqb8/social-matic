@@ -19,6 +19,7 @@ export const env = createEnv({
       .default("development"),
     TWITTER_APP_KEY: z.string(),
     TWITTER_APP_SECRET: z.string(),
+    QSTASH_TOKEN: z.string(),
   },
 
   /**
@@ -39,6 +40,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     TWITTER_APP_KEY: process.env.TWITTER_APP_KEY,
     TWITTER_APP_SECRET: process.env.TWITTER_APP_SECRET,
+    QSTASH_TOKEN: process.env.QSTASH_TOKEN,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

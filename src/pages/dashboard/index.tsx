@@ -68,7 +68,7 @@ const CreatePostWizard = () => {
 
   const { mutate, isLoading: isPosting } = api.posts.createPost.useMutation({
     onSuccess: () => {
-      void ctx.posts.getAll.invalidate();
+      void ctx.posts.getAllScheduled.invalidate();
       toast.success("Post scheduled!");
     },
     onError: (err) => {
