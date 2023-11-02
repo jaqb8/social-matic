@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verifySignature } from "@upstash/qstash/dist/nextjs";
 import clerk from "@clerk/clerk-sdk-node";
+import { TwitterApi } from "twitter-api-v2";
+import { env } from "../../env.mjs";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log("req.headers", req.headers);
@@ -20,8 +22,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  // const { token } = OAuthAccessToken;
   console.log("twitter access token: ", OAuthAccessToken);
+
+  const twitterClient = new TwitterApi({
+    appKey: env.TWITTER_APP_KEY,
+    appSecret: env.TWITTER_APP_SECRET,
+    accessToken: OAuthAccessToken.token,
+    accessSecret: OAuthAccessToken.tokenSecret,
+  });
 
   await new Promise((r) => setTimeout(r, 1000));
 
