@@ -24,15 +24,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   console.log("twitter access token: ", OAuthAccessToken);
 
-  const twitterClient = new TwitterApi({
-    appKey: env.TWITTER_APP_KEY,
-    appSecret: env.TWITTER_APP_SECRET,
-    accessToken: OAuthAccessToken.token,
-    accessSecret: OAuthAccessToken.tokenSecret,
-  });
+  // const twitterClient = new TwitterApi({
+  //   appKey: env.TWITTER_APP_KEY,
+  //   appSecret: env.TWITTER_APP_SECRET,
+  //   accessToken: OAuthAccessToken.token,
+  //   accessSecret: OAuthAccessToken.tokenSecret,
+  // });
 
-  const user = await twitterClient.v2.me();
-  console.log("twitter user", user);
+  // const user = await twitterClient.v2.me();
+  // console.log("twitter user", user);
 
   await new Promise((r) => setTimeout(r, 1000));
 
