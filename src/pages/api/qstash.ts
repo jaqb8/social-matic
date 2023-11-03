@@ -31,6 +31,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     accessSecret: OAuthAccessToken.tokenSecret,
   });
 
+  const user = await twitterClient.v2.me();
+  console.log("twitter user", user);
+
   await new Promise((r) => setTimeout(r, 1000));
 
   console.log("Success");
