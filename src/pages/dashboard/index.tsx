@@ -430,7 +430,8 @@ const CreatePostWizard = () => {
               onClick={() => {
                 console.log(form.formState.errors);
               }}
-              className="w-full sm:w-auto"
+              variant="outline"
+              className="w-full bg-inherit from-slate-600 to-purple-950 font-bold hover:border-0 hover:bg-gradient-to-r hover:text-slate-100 hover:drop-shadow-md sm:w-auto"
               type="submit"
             >
               Submit

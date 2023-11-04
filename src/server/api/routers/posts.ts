@@ -19,7 +19,12 @@ const ratelimit = new Ratelimit({
 const qstashClient = new Client({
   token: env.QSTASH_TOKEN,
 });
-const QSTASH_URL = "https://social-matic.vercel.app/api/qstash";
+const QSTASH_URL = {
+  [PlatformEnum.enum.TWITTER]:
+    "https://social-matic.vercel.app/api/post-twitter",
+  [PlatformEnum.enum.LINKEDIN]:
+    "https://social-matic.vercel.app/api/post-linkedin",
+};
 
 export const postsRouter = createTRPCRouter({
   getAll: privateProcedure.query(async ({ ctx }) => {
@@ -117,18 +122,28 @@ export const postsRouter = createTRPCRouter({
       });
 
       const cron = buildCronFromDate(input.postDate);
-      await qstashClient.schedules.create({
-        destination: QSTASH_URL,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: authorId,
-          content: input.content,
-          platforms: input.platforms,
+      const qstashPromises = input.platforms.map((platform) =>
+        qstashClient.schedules.create({
+          destination: QSTASH_URL[platform],
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: authorId,
+            content: input.content,
+          }),
+          cron,
         }),
-        cron,
-      });
+      );
+
+      try {
+        await Promise.all(qstashPromises);
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Could not schedule post. Please try again later.",
+        });
+      }
 
       return post;
     }),

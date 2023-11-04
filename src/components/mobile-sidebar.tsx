@@ -1,15 +1,9 @@
 import { useUser } from "@clerk/nextjs";
-import {
-  Archive,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-  User,
-  X,
-} from "lucide-react";
+import { LogOut, X } from "lucide-react";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { menuItems } from "@/lib/menu-items";
 
 interface MobileSidebarProps {
   onOpen: () => void;
@@ -19,36 +13,13 @@ interface MobileSidebarProps {
 const MobileSidebar = ({ onOpen, isOpen }: MobileSidebarProps) => {
   const { user, isSignedIn } = useUser();
 
-  const menuItems = [
-    {
-      name: "Dashboard",
-      icon: <LayoutDashboard />,
-      href: "/dashboard",
-    },
-    {
-      name: "Archive",
-      icon: <Archive />,
-      href: "/archive",
-    },
-    {
-      name: "Settings",
-      icon: <Settings />,
-      href: "/#",
-    },
-    {
-      name: "Account",
-      icon: <User />,
-      href: "/#",
-    },
-  ] as const;
-
   if (!isSignedIn) {
     return null;
   }
 
   return (
     <aside
-      className={`fixed bottom-0 left-0 top-0 w-[300px] bg-slate-500 px-6 py-4 text-center text-slate-100 transition-transform ${
+      className={`fixed bottom-0 left-0 top-0 z-50 w-[300px] bg-slate-500 px-6 py-4 text-center text-slate-100 transition-transform ${
         !isOpen && "-translate-x-full"
       }`}
     >
@@ -70,14 +41,17 @@ const MobileSidebar = ({ onOpen, isOpen }: MobileSidebarProps) => {
           </div>
         </div>
         <div className="flex flex-1 flex-col gap-2">
-          {menuItems.map((item) => (
-            <Link key={item.name} href={item.href}>
-              <div className="flex gap-2 p-2 font-bold">
-                {item.icon}
-                {item.name}
-              </div>
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.name} href={item.href}>
+                <div className="flex gap-2 p-2 font-bold">
+                  {<Icon />}
+                  {item.name}
+                </div>
+              </Link>
+            );
+          })}
         </div>
         <div className="flex gap-2 px-2 pb-8 font-bold">
           <LogOut />
