@@ -57,7 +57,7 @@ const Sidebar = () => {
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
-                <Link key={item.name} href={`/${item.href}`}>
+                <Link key={item.name} href={`${item.href}`}>
                   <Button
                     variant="primary"
                     className="text-md flex w-full justify-start gap-2 font-bold"

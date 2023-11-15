@@ -7,7 +7,6 @@ import { Client } from "@upstash/qstash";
 import { Redis } from "@upstash/redis";
 import { PlatformEnum } from "@/lib/types";
 import { env } from "@/env.mjs";
-import { buildCronFromDate } from "@/lib/utils";
 
 // Create a new ratelimiter with a sliding window of 3 requests per minute
 const ratelimit = new Ratelimit({
@@ -35,9 +34,6 @@ export const postsRouter = createTRPCRouter({
           postDate: "asc",
         },
       ],
-      include: {
-        platforms: true,
-      },
       where: {
         authorId: ctx.currentUserId,
       },
@@ -51,9 +47,6 @@ export const postsRouter = createTRPCRouter({
           postDate: "asc",
         },
       ],
-      include: {
-        platforms: true,
-      },
       where: {
         authorId: ctx.currentUserId,
         postDate: {
@@ -70,9 +63,6 @@ export const postsRouter = createTRPCRouter({
           postDate: "asc",
         },
       ],
-      include: {
-        platforms: true,
-      },
       where: {
         authorId: ctx.currentUserId,
         postDate: {
@@ -108,43 +98,41 @@ export const postsRouter = createTRPCRouter({
         });
       }
 
-      const post = await ctx.db.post.create({
-        data: {
-          authorId,
-          content: input.content,
-          postDate: input.postDate,
-          platforms: {
-            connect: input.platforms.map((platform) => ({
-              name: platform,
-            })),
-          },
-        },
-      });
-
-      const cron = buildCronFromDate(input.postDate);
-      const qstashPromises = input.platforms.map((platform) =>
-        qstashClient.schedules.create({
-          destination: QSTASH_URL[platform],
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+      const createPostPromises = input.platforms.map(async (platform) => {
+        const { messageId } = await qstashClient.publishJSON({
+          url: QSTASH_URL[platform],
+          notBefore: Math.floor(input.postDate.getTime() / 1000),
+          body: {
             userId: authorId,
             content: input.content,
-          }),
-          cron,
-        }),
-      );
+          },
+        });
+
+        const post = ctx.db.post.create({
+          data: {
+            authorId,
+            content: input.content,
+            postDate: input.postDate,
+            platform,
+            messageId,
+          },
+        });
+
+        return post;
+      });
 
       try {
-        await Promise.all(qstashPromises);
+        const posts = await Promise.all(createPostPromises);
+
+        return {
+          posts,
+        };
       } catch (error) {
+        console.log(error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Could not schedule post. Please try again later.",
         });
       }
-
-      return post;
     }),
 });

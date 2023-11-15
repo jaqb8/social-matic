@@ -19,17 +19,11 @@ model Post {
     content    String      @db.VarChar(255)
     mediaURL   String?
     postDate   DateTime
-    platforms  Platform[]
-
-    authorId  String
+    platform   PlatormEnum
+    messageId  String      
+    authorId   String
 
     @@index([authorId])
-}
-
-model Platform {
-    id       String           @id @default(cuid())
-    name     PlatormEnum      @unique
-    posts    Post[]
 }
 
 enum PlatormEnum {

@@ -67,7 +67,8 @@ const CreatePostWizard = () => {
   const ctx = api.useContext();
 
   const { mutate, isLoading: isPosting } = api.posts.createPost.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(`Post scheduled! ${JSON.stringify(data)}`);
       void ctx.posts.getAllScheduled.invalidate();
       toast.success("Post scheduled!");
     },
@@ -160,7 +161,6 @@ const CreatePostWizard = () => {
       ),
     },
   ] as const;
-  console.log(user?.externalAccounts);
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = (
     data: z.infer<typeof formSchema>,
@@ -480,7 +480,7 @@ const PostsList = () => {
 type Post = RouterOutputs["posts"]["getAll"][number];
 
 const PostItem = (props: Post) => {
-  const { content, postDate, platforms } = props;
+  const { content, postDate, platform } = props;
 
   const platformIcons = {
     TWITTER: <Twitter size={16} />,
@@ -497,9 +497,7 @@ const PostItem = (props: Post) => {
           )})`}
         </p>
         <p className="flex items-center gap-2 text-sm font-light">
-          {platforms.map((platform) => (
-            <span key={platform.id}>{platformIcons[platform.name]}</span>
-          ))}
+          <span>{platformIcons[platform as PlatformEnum]}</span>
         </p>
       </div>
     </div>
