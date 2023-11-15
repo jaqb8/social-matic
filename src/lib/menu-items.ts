@@ -19,6 +19,6 @@ export const menuItems = [
   {
     name: "Account",
     icon: User,
-    href: "/#",
+    href: "/user-profile",
   },
 ] as const;

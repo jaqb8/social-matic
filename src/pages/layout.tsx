@@ -4,7 +4,7 @@ import React, { type PropsWithChildren } from "react";
 const Layout = (props: PropsWithChildren) => {
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       {props.children}
     </>
   );

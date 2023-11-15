@@ -419,8 +419,12 @@ const CreatePostWizard = () => {
           />
 
           {isPosting && (
-            <Button disabled>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Button
+              disabled
+              variant="outline"
+              className="flex w-full gap-2 border-0 bg-gradient-to-r from-slate-600 to-purple-950 font-bold drop-shadow-md sm:w-auto"
+            >
+              <Loader2 className="animate-spin" size={18} />
               Please wait
             </Button>
           )}

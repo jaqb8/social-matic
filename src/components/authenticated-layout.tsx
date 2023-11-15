@@ -1,9 +1,12 @@
-import { useUser } from "@clerk/nextjs";
+import { SignOutButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import React, { type PropsWithChildren } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { menuItems } from "@/lib/menu-items";
+import { LogOut } from "lucide-react";
+import { useRouter } from "next/router";
+import { Button } from "./ui/button";
 
 const AuthenticatedLayout = (props: PropsWithChildren) => {
   return (
@@ -18,6 +21,7 @@ const AuthenticatedLayout = (props: PropsWithChildren) => {
 
 const Sidebar = () => {
   const { user, isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
 
   if (!isLoaded) {
     return <Skeleton className="hidden sm:block sm:w-72" />;
@@ -49,21 +53,31 @@ const Sidebar = () => {
             </div>
           </div>
           <div className="border-b-4 border-dotted"></div>
-          <div>
-            <li className="flex list-none flex-col gap-3 font-bold">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link key={item.name} href={`/${item.href}`}>
-                    <ul className="flex cursor-pointer items-center gap-2 rounded-md  from-slate-500 to-purple-950 px-4 py-2 hover:bg-gradient-to-r hover:text-slate-100 hover:drop-shadow-md">
-                      <Icon size={20} />
-                      {item.name}
-                    </ul>
-                  </Link>
-                );
-              })}
-            </li>
+          <div className="flex flex-col gap-3">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.name} href={`/${item.href}`}>
+                  <Button
+                    variant="primary"
+                    className="text-md flex w-full justify-start gap-2 font-bold"
+                  >
+                    <Icon size={20} />
+                    {item.name}
+                  </Button>
+                </Link>
+              );
+            })}
           </div>
+          <div className="border-b-4 border-dotted"></div>
+          <SignOutButton signOutCallback={() => router.push("/")}>
+            <Button
+              variant="danger"
+              className="text-md flex justify-start gap-2"
+            >
+              <LogOut /> Logout
+            </Button>
+          </SignOutButton>
         </div>
       </aside>
     </>

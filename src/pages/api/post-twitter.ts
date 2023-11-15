@@ -27,7 +27,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     tokens = await clerk.users.getUserOauthAccessToken(userId, "oauth_twitter");
   } catch (error) {
-    console.log("error", error);
     if (isClerkAPIResponseError(error)) {
       return res.status(400).json({ error: error.errors[0]?.longMessage });
     } else {
